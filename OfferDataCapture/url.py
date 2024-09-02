@@ -1,0 +1,1 @@
+url_base_randstad = "https://www.randstad.es/candidatos/ofertas-empleo/"
