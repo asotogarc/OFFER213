@@ -156,8 +156,8 @@ def main():
             if st.button("📤 Enviar datos a Google Sheets"):
                 with st.spinner('Enviando datos a Google Sheets...'):
                     try:
-                        database_original = read_sheet(credentials=st.secrets["credentials"])
-                        result = write_sheets(credentials=st.secrets["credentials"], dataframe=st.session_state.df)
+                        database_original = read_sheet(credentials=config.credentials)
+                        result = write_sheets(credentials=config.credentials, dataframe=st.session_state.df)
                         
                         if isinstance(result, HttpError):
                             st.error(f"❌ Error al enviar datos: {result}")
