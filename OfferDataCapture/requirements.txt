@@ -1,2 +1,3 @@
 plotly
 beautifulsoup4
+google-auth
