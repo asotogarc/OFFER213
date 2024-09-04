@@ -31,16 +31,26 @@ def read_sheet(credentials):
 def write_sheets(credentials, dataframe):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     SPREADSHEET_ID = '1PsSZJJtpcwSnfv7FMdsW1RqPO7JBV4izzB8klu0YzO4'
-
     creds = service_account.Credentials.from_service_account_info(credentials, scopes=SCOPES)
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets()
 
-    # Convert Timestamp objects to strings
-    dataframe = dataframe.applymap(lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if isinstance(x, pd.Timestamp) else x)
+    # Función para formatear fechas y otros tipos de datos
+    def format_value(x):
+        if isinstance(x, pd.Timestamp):
+            return x.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(x, datetime):
+            return x.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(x, (np.int64, np.float64)):
+            return str(x)
+        else:
+            return x
 
-    # Convert the DataFrame to a list of lists, excluding the first row
-    values = dataframe.iloc[1:].values.tolist()
+    # Aplicar la función de formateo a todo el DataFrame
+    formatted_df = dataframe.applymap(format_value)
+
+    # Convertir el DataFrame a una lista de listas, excluyendo la primera fila
+    values = formatted_df.iloc[1:].values.tolist()
 
     result = sheet.values().append(
         spreadsheetId=SPREADSHEET_ID,
@@ -49,7 +59,6 @@ def write_sheets(credentials, dataframe):
         insertDataOption='INSERT_ROWS',
         body={'values': values}
     ).execute()
-
     return result
 
 
