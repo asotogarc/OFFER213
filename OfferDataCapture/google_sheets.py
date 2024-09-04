@@ -4,6 +4,9 @@ from google.oauth2 import service_account
 import pandas as pd
 import config 
 
+import numpy as np
+from datetime import datetime, timedelta
+
 def read_sheet(credentials):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     SPREADSHEET_ID = '1PsSZJJtpcwSnfv7FMdsW1RqPO7JBV4izzB8klu0YzO4'
@@ -35,36 +38,32 @@ def write_sheets(credentials, dataframe):
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets()
 
-    # Función para formatear fechas y otros tipos de datos
     def format_value(x):
-        if isinstance(x, pd.Timestamp):
-            return x.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(x, datetime):
-            return x.strftime('%Y-%m-%d %H:%M:%S')
+        if isinstance(x, (pd.Timestamp, datetime)):
+            # Convertir la fecha a una fórmula de Google Sheets
+            return f'=DATE({x.year},{x.month},{x.day})+TIME({x.hour},{x.minute},{x.second})'
         elif isinstance(x, (np.int64, np.float64)):
             return str(x)
+        elif pd.isna(x):
+            return ''  # Manejar valores NaN o None
         else:
-            return x
+            return str(x)
 
     # Aplicar la función de formateo a todo el DataFrame
     formatted_df = dataframe.applymap(format_value)
 
-    # Convertir el DataFrame a una lista de listas, excluyendo la primera fila
-    values = formatted_df.iloc[1:].values.tolist()
+    # Convertir el DataFrame a una lista de listas, excluyendo la primera fila si es necesario
+    values = formatted_df.values.tolist()
 
-    result = sheet.values().append(
+    result = sheet.values().update(
         spreadsheetId=SPREADSHEET_ID,
-        range='Hoja 1', 
+        range='Hoja 1',
         valueInputOption='USER_ENTERED',
-        insertDataOption='INSERT_ROWS',
         body={'values': values}
     ).execute()
     return result
 
 
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
 
 # Crear datos de muestra
 #num_rows = 10
