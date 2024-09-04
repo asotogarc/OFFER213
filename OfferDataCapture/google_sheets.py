@@ -38,16 +38,8 @@ def write_sheets(credentials, dataframe):
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets()
 
-    def format_value(x):
-        if isinstance(x, (pd.Timestamp, datetime)):
-            # Convertir la fecha a una fórmula de Google Sheets
-            return f'=DATE({x.year},{x.month},{x.day})+TIME({x.hour},{x.minute},{x.second})'
-        elif isinstance(x, (np.int64, np.float64)):
-            return str(x)
-        elif pd.isna(x):
-            return ''  # Manejar valores NaN o None
-        else:
-            return str(x)
+    dataframe = dataframe.applymap(lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if isinstance(x, pd.Timestamp) else x)
+
 
     # Aplicar la función de formateo a todo el DataFrame
     formatted_df = dataframe.applymap(format_value)
