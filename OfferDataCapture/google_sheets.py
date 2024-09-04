@@ -37,32 +37,21 @@ def write_sheets(credentials, dataframe):
     creds = service_account.Credentials.from_service_account_info(credentials, scopes=SCOPES)
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets()
-
-    def format_value(x):
-        if isinstance(x, (pd.Timestamp, datetime)):
-            # Convertir la fecha a una fórmula de Google Sheets
-            return f'=DATE({x.year},{x.month},{x.day})+TIME({x.hour},{x.minute},{x.second})'
-        elif isinstance(x, (np.int64, np.float64)):
-            return str(x)
-        elif pd.isna(x):
-            return ''  # Manejar valores NaN o None
-        else:
-            return str(x)
-
-    # Aplicar la función de formateo a todo el DataFrame
-    formatted_df = dataframe.applymap(format_value)
-
-    # Convertir el DataFrame a una lista de listas, excluyendo la primera fila si es necesario
-    values = formatted_df.values.tolist()
-
-    result = sheet.values().update(
+    # Convert Timestamp objects to strings
+    dataframe = dataframe.applymap(lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if isinstance(x, pd.Timestamp) else x)
+    # Convert the DataFrame to a list of lists, excluding the first row
+    values = dataframe.iloc[1:].values.tolist()
+    result = sheet.values().append(
         spreadsheetId=SPREADSHEET_ID,
-        range='Hoja 1',
+        range='Hoja 1', 
         valueInputOption='USER_ENTERED',
+        insertDataOption='INSERT_ROWS',
         body={'values': values}
     ).execute()
     return result
-
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 
 
 # Crear datos de muestra
