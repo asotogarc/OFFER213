@@ -11,10 +11,12 @@ def create_and_check_url(url_base):
     skill = st.session_state.get('skill', '')
     
     st.text_input('Introduzca la ciudad donde quiere buscar la oferta de trabajo:', key='city', value=city)
-    st.text_input('Introduzca la skill principal de la oferta de trabajo:', key='skill', value=skill)
+    st.text_input('Introduzca la skill principal de la oferta de trabajo (opcional):', key='skill', value=skill)
     
-    if st.session_state.city and st.session_state.skill:
-        url_user_input = f"p-{st.session_state.city}/q-{st.session_state.skill}/"
+    if st.session_state.city:
+        url_user_input = f"p-{st.session_state.city}/"
+        if st.session_state.skill:
+            url_user_input += f"q-{st.session_state.skill}/"
         url = url_base + url_user_input
         return url
     return None
@@ -39,7 +41,6 @@ def get_url_offers(url):
         time.sleep(1)  # Añadir un pequeño retraso para no sobrecargar el servidor
     
     return all_links
-
 # Función para extraer datos de cada oferta
 def extract_data_from_offer(url_base):
     par_text = []
