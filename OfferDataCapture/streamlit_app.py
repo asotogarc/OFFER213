@@ -110,7 +110,7 @@ def generate_summary(data):
 
 
 def main():
-    st.markdown("<h1 style='text-align: center;'>EINNOVA | CAPTURA DE OFERTAS DE TRABAJO</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'></h1>", unsafe_allow_html=True)
 
     # Inicializar el estado de la sesión si no existe
     if 'df' not in st.session_state:
