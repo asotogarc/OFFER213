@@ -16,7 +16,7 @@ def create_and_check_url(url_base):
     if st.session_state.city:
         url_user_input = f"p-{st.session_state.city}/"
         if st.session_state.skill:
-            url_user_input += f"jb-{st.session_state.skill}/"
+            url_user_input += f"wm-{st.session_state.skill}/"
         url = url_base + url_user_input
         return url
     return None
